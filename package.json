@@ -1,0 +1,57 @@
+{
+  "name": "email-confirmation",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Email confirmation service using Sailhouse events",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "tsc",
+    "lint": "eslint --config eslint.config.cjs . --ext .ts,.tsx",
+    "lint:fix": "eslint --config eslint.config.cjs . --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "@netlify/functions": "^3.0.4",
+    "@react-email/components": "^0.0.15",
+    "@react-email/render": "^0.0.12",
+    "@sailhouse/client": "^1.2.0",
+    "email-validator": "^2.0.4",
+    "postmark": "^4.0.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "resend": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.21",
+    "@types/react": "^18.2.47",
+    "@eslint/js": "^9.23.0",
+    "@typescript-eslint/eslint-plugin": "^8.27.0",
+    "@typescript-eslint/parser": "^8.27.0",
+    "dotenv": "^16.3.1",
+    "eslint": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.33.2",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "netlify-cli": "^19.0.3",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "npx eslint --config eslint.config.cjs --fix",
+      "prettier --write"
+    ]
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+}
