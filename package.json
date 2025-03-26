@@ -12,14 +12,17 @@
     "lint": "eslint --config eslint.config.cjs . --ext .ts,.tsx",
     "lint:fix": "eslint --config eslint.config.cjs . --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "token-test": "npx tsx scripts/token-test.ts"
   },
   "dependencies": {
+    "@netlify/blobs": "^8.1.2",
     "@netlify/functions": "^3.0.4",
     "@react-email/components": "^0.0.15",
     "@react-email/render": "^0.0.12",
     "@sailhouse/client": "^1.2.0",
     "email-validator": "^2.0.4",
+    "node-fetch": "^3.3.2",
     "postmark": "^4.0.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -40,6 +43,8 @@
     "lint-staged": "^15.2.0",
     "netlify-cli": "^19.0.3",
     "prettier": "^3.2.4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
     "typescript": "^5.3.3"
   },
   "husky": {

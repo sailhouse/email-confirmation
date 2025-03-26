@@ -22,8 +22,8 @@ const getEmailProvider = (): EmailProvider => {
     return 'resend';
   }
 
-  // Default to postmark if no provider is explicitly configured
-  return 'postmark';
+  // Default to resend if no provider is explicitly configured
+  return 'resend';
 };
 
 // Send email using Postmark

@@ -1,6 +1,7 @@
 import { Context, Config } from '@netlify/functions';
 import { validate } from 'email-validator';
 import { sendConfirmationEmail } from '../utils/email';
+import { generateSecureToken } from '../utils/token';
 
 export default async (req: Request, context: Context) => {
   // Only accept POST requests
@@ -30,8 +31,8 @@ export default async (req: Request, context: Context) => {
       return new Response('Invalid email format', { status: 400 });
     }
 
-    // Create confirmation URL with token
-    const token = Buffer.from(email).toString('base64');
+    // Create confirmation URL with secure token
+    const token = generateSecureToken(email);
     const confirmationUrl = `${context.site.url}/api/confirm?token=${token}`;
 
     // Send confirmation email

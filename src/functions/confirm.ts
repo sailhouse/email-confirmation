@@ -1,5 +1,7 @@
 import { Context, Config } from '@netlify/functions';
 import { validate } from 'email-validator';
+import { getSubscriberBlobStore } from '../utils/blobStore';
+import { verifyAndExtractEmail } from '../utils/token';
 
 export default async (req: Request, _context: Context) => {
   // Only accept GET requests for confirmation links
@@ -16,26 +18,51 @@ export default async (req: Request, _context: Context) => {
       return new Response('Missing token', { status: 400 });
     }
 
-    // Decode the email from the token
-    const email = Buffer.from(token, 'base64').toString();
+    // Verify and decode the email from the token
+    const email = verifyAndExtractEmail(token);
 
-    // Validate the email
-    if (!validate(email)) {
+    if (!email) {
       return new Response('Invalid token', { status: 400 });
     }
 
-    // Initialize Sailhouse client
-    const { SailhouseClient } = await import('@sailhouse/client');
-    const sailhouse = new SailhouseClient(process.env.SAILHOUSE_API_KEY || '');
+    if (!validate(email)) {
+      return new Response('Invalid email', { status: 400 });
+    }
 
-    // Send confirmation event to Sailhouse
-    await sailhouse.publish(process.env.CONFIRMATION_TOPIC || 'changelog-confirmation', {
-      email,
-      confirmed: true,
-      timestamp: new Date().toISOString(),
-    });
+    // Get current timestamp
+    const timestamp = new Date().toISOString();
 
-    console.log('Confirmation event sent to Sailhouse');
+    const blobStore = getSubscriberBlobStore();
+    if (!blobStore) {
+      console.error('Failed to initialize Blob Store');
+      return new Response('Internal server error', { status: 500 });
+    }
+
+    try {
+      // This will intentionally overwrite any existing data for the email
+      await blobStore.setJSON(email, {
+        email,
+        timestamp,
+      });
+
+      console.log('Email saved to Blob Store');
+
+      // Initialize Sailhouse client
+      const { SailhouseClient } = await import('@sailhouse/client');
+      const sailhouse = new SailhouseClient(process.env.SAILHOUSE_API_KEY || '');
+
+      // Send confirmation event to Sailhouse
+      await sailhouse.publish(process.env.CONFIRMATION_TOPIC || 'changelog-confirmation', {
+        email,
+        confirmed: true,
+        timestamp,
+      });
+
+      console.log('Confirmation event sent to Sailhouse');
+    } catch (storeError) {
+      console.error('Error saving to blob store:', storeError);
+      return new Response('Internal server error', { status: 500 });
+    }
 
     // Redirect to success page
     return new Response(null, {
