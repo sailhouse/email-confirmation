@@ -138,14 +138,14 @@ The service automatically uses Netlify's context object to determine the site UR
 
 This service integrates with Sailhouse by:
 
-1. Receiving push events from Sailhouse at the `/api/subscribe` endpoint
+1. Receiving push events from Sailhouse at the `/api/subscribe` endpoint. Our website populates these events when someone subscribes.
 2. Processing the event to send a confirmation email
 3. Publishing confirmation events when users verify their email
 4. Generating summary reports of subscription activity
 
 ### Setting Up Sailhouse
 
-1. Create a push subscription pointing to your Netlify function:
+1. Create a _push_ subscription pointing to your Netlify function:
 
    ```bash
    https://your-netlify-app.netlify.app/api/subscribe
@@ -163,7 +163,7 @@ This service integrates with Sailhouse by:
    https://your-netlify-app.netlify.app/api/summary
    ```
 
-4. This relies on push subscriptions being setup on the two topics you've already setup, and then setting those in the .env file:
+4. This relies on a _pull_ subscription being setup on the topic used for confirmations you are using when `/api/confirm/ runs`, and then setting this in the .env file:
 
    ```bash
    CONFIRMATION_SUBSCRIPTION=confirmation-subscription
@@ -203,6 +203,8 @@ This service uses Netlify Blob Store to persistently store subscriber informatio
 1. Blob storage is automatically enabled for your Netlify site
 2. No additional configuration is required
 3. Subscriber data is stored using the email address as the key
+
+This demo doesn't do much with it, but it's there for all other functions, and via the CLI, to pull out emails as needed in any other processing.
 
 ## Security Features
 
