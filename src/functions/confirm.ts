@@ -39,6 +39,9 @@ export default async (req: Request, _context: Context) => {
     }
 
     try {
+      // Check if email already exists in the blob store
+      const existingEmail = await blobStore.get(email);
+
       // This will intentionally overwrite any existing data for the email
       await blobStore.setJSON(email, {
         email,
@@ -47,18 +50,23 @@ export default async (req: Request, _context: Context) => {
 
       console.log('Email saved to Blob Store');
 
-      // Initialize Sailhouse client
-      const { SailhouseClient } = await import('@sailhouse/client');
-      const sailhouse = new SailhouseClient(process.env.SAILHOUSE_API_KEY || '');
+      // Only send Sailhouse event if email doesn't already exist
+      if (!existingEmail) {
+        // Initialize Sailhouse client
+        const { SailhouseClient } = await import('@sailhouse/client');
+        const sailhouse = new SailhouseClient(process.env.SAILHOUSE_API_KEY || '');
 
-      // Send confirmation event to Sailhouse
-      await sailhouse.publish(process.env.CONFIRMATION_TOPIC || 'changelog-confirmation', {
-        email,
-        confirmed: true,
-        timestamp,
-      });
+        // Send confirmation event to Sailhouse
+        await sailhouse.publish(process.env.CONFIRMATION_TOPIC || 'changelog-confirmation', {
+          email,
+          confirmed: true,
+          timestamp,
+        });
 
-      console.log('Confirmation event sent to Sailhouse');
+        console.log('Confirmation event sent to Sailhouse');
+      } else {
+        console.log('Email already exists, skipping Sailhouse event');
+      }
     } catch (storeError) {
       console.error('Error saving to blob store:', storeError);
       return new Response('Internal server error', { status: 500 });
