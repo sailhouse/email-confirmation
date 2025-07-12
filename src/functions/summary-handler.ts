@@ -1,3 +1,4 @@
+import { sailhouseClient, SIGNATURE } from '@/utils/sailhouse';
 import { Context, Config } from '@netlify/functions';
 
 interface SummaryStats {
@@ -12,13 +13,17 @@ export default async (req: Request, _context: Context) => {
   }
 
   try {
-    // Validate Sailhouse signature
-    const shSignature = req.headers.get('sh-signature');
-    const sailhouseSignature = process.env.SAILHOUSE_SIGNATURE;
+    const shSignature = req.headers.get('Sailhouse-Signature');
+    const body = await req.text();
 
-    if (!shSignature || shSignature !== sailhouseSignature) {
-      console.error('Invalid Sailhouse signature');
-      return new Response('Unauthorized', { status: 403 });
+    if (!shSignature) {
+      return new Response('Missing Sailhouse signature', { status: 401 });
+    }
+
+    const valid = sailhouseClient.verifyPushSubscription(shSignature, body, SIGNATURE);
+
+    if (!valid) {
+      return new Response('Invalid Sailhouse signature', { status: 401 });
     }
 
     const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;

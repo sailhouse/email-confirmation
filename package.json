@@ -20,7 +20,7 @@
     "@netlify/functions": "^3.0.4",
     "@react-email/components": "^0.0.15",
     "@react-email/render": "^0.0.12",
-    "@sailhouse/client": "^1.2.0",
+    "@sailhouse/client": "^1.5.0",
     "email-validator": "^2.0.4",
     "node-fetch": "^3.3.2",
     "postmark": "^4.0.2",

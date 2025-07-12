@@ -2,6 +2,7 @@ import { Context, Config } from '@netlify/functions';
 import { validate } from 'email-validator';
 import { sendConfirmationEmail } from '../utils/email';
 import { generateSecureToken } from '../utils/token';
+import { sailhouseClient, SIGNATURE } from '@/utils/sailhouse';
 
 export default async (req: Request, context: Context) => {
   // Only accept POST requests
@@ -10,20 +11,24 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    // Validate Sailhouse signature
-    const shSignature = req.headers.get('sh-signature');
-    const sailhouseSignature = process.env.SAILHOUSE_SIGNATURE;
+    const shSignature = req.headers.get('Sailhouse-Signature');
+    const body = await req.text();
 
-    if (!shSignature || shSignature !== sailhouseSignature) {
-      console.error('Invalid signature');
-      return new Response('Unauthorized', { status: 403 });
+    if (!shSignature) {
+      return new Response('Missing Sailhouse signature', { status: 401 });
+    }
+
+    const valid = sailhouseClient.verifyPushSubscription(shSignature, body, SIGNATURE);
+
+    if (!valid) {
+      return new Response('Invalid Sailhouse signature', { status: 401 });
     }
 
     // Parse the request body
-    const body = await req.json();
+    const { data: event } = JSON.parse(body);
 
     // Extract email from the Sailhouse event
-    const email = body.email;
+    const email = event.email;
 
     // Basic validation
     if (!email || !validate(email)) {
